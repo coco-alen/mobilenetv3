@@ -20,6 +20,7 @@ from timm.loss import LabelSmoothingCrossEntropy, SoftTargetCrossEntropy
 from timm.utils import ModelEma
 from optim_factory import create_optimizer, LayerDecayValueAssigner
 from mobilenetv3 import MobileNetV3_Small, MobileNetV3_Large
+from mobilenetv2 import MobileNetV2
 
 from datasets import build_dataset
 from engine import train_one_epoch, evaluate
@@ -102,6 +103,8 @@ def main(args):
         model = MobileNetV3_Small()
     elif args.model == "mobilenet_v3_large":
         model = MobileNetV3_Large()
+    elif args.model == "mobilenet_v2":
+        model = MobileNetV2()
 
     if args.finetune:
         if args.finetune.startswith('https'):

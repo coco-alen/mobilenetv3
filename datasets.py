@@ -6,7 +6,7 @@
 # LICENSE file in the root directory of this source tree.
 
 
-import os, lmdb, pickle, six
+import os, pickle, six
 from PIL import Image
 import torch
 from torchvision import datasets, transforms
@@ -16,38 +16,6 @@ from timm.data.constants import \
 from timm.data import create_transform
 
 
-class ImageFolderLMDB(torch.utils.data.Dataset):
-    def __init__(self, db_path, transform=None):
-        self.db_path = db_path
-        self.env = lmdb.open(db_path, subdir=False, readonly=True, lock=False, readahead=False, meminit=False)
-        with self.env.begin(write=False) as txn:
-            self.length = pickle.loads(txn.get(b'__len__'))
-            self.keys = pickle.loads(txn.get(b'__keys__'))
-        self.transform = transform
-
-    def __getitem__(self, idx):
-        env = self.env
-        with env.begin(write=False) as txn:
-            byteflow = txn.get(self.keys[idx])
-        unpacked = pickle.loads(byteflow)
-
-        # load image
-        imgbuf = unpacked[0]
-        buf = six.BytesIO()
-        buf.write(imgbuf)
-        buf.seek(0)
-        img = Image.open(buf).convert('RGB')
-
-        # load label
-        label = unpacked[1]
-
-        if self.transform is not None:
-            img = self.transform(img)
-
-        return img, label
-
-    def __len__(self):
-        return self.length
 
 def build_dataset(is_train, args):
     transform = build_transform(is_train, args)
@@ -70,11 +38,6 @@ def build_dataset(is_train, args):
         print("reading from datapath", args.data_path)
         root = os.path.join(args.data_path, 'train' if is_train else 'val')
         dataset = datasets.ImageFolder(root, transform=transform)
-        nb_classes = 1000
-    elif args.data_set == 'IMNET_LMDB':
-        print("reading from datapath", args.data_path)
-        path = os.path.join(args.data_path, 'train.lmdb' if is_train else 'val.lmdb')
-        dataset = ImageFolderLMDB(path, transform=transform)
         nb_classes = 1000
     elif args.data_set == "image_folder":
         root = args.data_path if is_train else args.eval_data_path
