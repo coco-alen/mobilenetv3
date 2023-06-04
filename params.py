@@ -166,8 +166,8 @@ def get_args_parser():
                         help="The name of the W&B project where you're sending the new run.")
     parser.add_argument('--wandb_ckpt', type=str2bool, default=False,
                         help="Save model checkpoints as W&B Artifacts.")
-    parser.add_argument('--quantization', type=int, default=0,
-                        help='quantization set of model, value for quantize bit, 0 for no quantization')
+    parser.add_argument('--quantize', type=str, default=None,
+                        help='quantization config file path')
 
 
     return parser

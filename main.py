@@ -28,6 +28,9 @@ from engine import train_one_epoch, evaluate
 from params import args
 from utils import NativeScalerWithGradNormCount as NativeScaler
 import utils
+from utils_gyp import import_variable
+
+from quantize import quantize_model
 
 def main(args):
     utils.init_distributed_mode(args)
@@ -128,6 +131,7 @@ def main(args):
                 print(f"Removing key {k} from pretrained checkpoint")
                 del checkpoint_model[k]
         utils.load_state_dict(model, checkpoint_model, prefix=args.model_prefix)
+        
     model.to(device)
 
     model_ema = None
@@ -201,6 +205,11 @@ def main(args):
     utils.auto_load_model(
         args=args, model=model, model_without_ddp=model_without_ddp,
         optimizer=optimizer, loss_scaler=loss_scaler, model_ema=model_ema)
+
+    if args.quantize != None:
+        config = import_variable(args.quantize, 'config')
+        print("Quantize model with config = %s" % str(config))
+        quantize_model(model, config, data_loader_train, optimizer)
 
     if args.eval:
         print(f"Eval only mode")

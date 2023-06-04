@@ -1,5 +1,7 @@
 *.log
 *.pth
 *.out
+*.txt
+
 
 __pycache__

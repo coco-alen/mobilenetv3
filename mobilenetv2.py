@@ -1,7 +1,8 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.nn import init
+# import torch.nn as nn
+import nni.retiarii.nn.pytorch as nn
+from nni.retiarii import model_wrapper
+from params import args
 
 def _make_divisible(v, divisor, min_value=None):
     """
@@ -66,7 +67,6 @@ class InvertedResidual(nn.Module):
         else:
             return self.conv(x)
 
-
 class MobileNetV2(nn.Module):
     def __init__(self, num_classes=1000, width_mult=1.0, inverted_residual_setting=None, round_nearest=8):
         """
@@ -116,8 +116,8 @@ class MobileNetV2(nn.Module):
         # make it nn.Sequential
         self.features = nn.Sequential(*features)
 
-        # self.quant = QuantStub()
-        # self.dequant = DeQuantStub()
+        # self.quant = quant.QuantStub()
+        # self.dequant = quant.DeQuantStub()
 
         # building classifier
         self.classifier = nn.Sequential(
@@ -139,20 +139,20 @@ class MobileNetV2(nn.Module):
                 nn.init.zeros_(m.bias)
 
     def forward(self, x):
-        # x = self.quant(x)
-        x = self.features(x)
+            # x = self.quant(x)
+        x = self.features(x.to(args.device))
         x = x.mean([2, 3])
         x = self.classifier(x)
-        # x = self.dequant(x)
+        #     x = self.dequant(x)
         return x
 
-    # Fuse Conv+BN and Conv+BN+Relu modules prior to quantization
-    # This operation does not change the numerics
-    def fuse_model(self):
-        for m in self.modules():
-            if type(m) == ConvBNReLU:
-                torch.ao.quantization.fuse_modules(m, ['0', '1', '2'], inplace=True)
-            if type(m) == InvertedResidual:
-                for idx in range(len(m.conv)):
-                    if type(m.conv[idx]) == nn.Conv2d:
-                        torch.ao.quantization.fuse_modules(m.conv, [str(idx), str(idx + 1)], inplace=True)
+    # # Fuse Conv+BN and Conv+BN+Relu modules prior to quantization
+    # # This operation does not change the numerics
+    # def fuse_model(self):
+    #     for m in self.modules():
+    #         if type(m) == ConvBNReLU:
+    #             torch.quantization.fuse_modules(m, ['0', '1', '2'], inplace=True)
+    #         if type(m) == InvertedResidual:
+    #             for idx in range(len(m.conv)):
+    #                 if type(m.conv[idx]) == nn.Conv2d:
+    #                     torch.quantization.fuse_modules(m.conv, [str(idx), str(idx + 1)], inplace=True)

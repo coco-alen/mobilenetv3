@@ -25,7 +25,7 @@
 #     --data_path /ssd/dataset/imagenet_1k \
 #     --output_dir ./checkpoint
 
-python main.py \
+python -u main.py \
     --model mobilenet_v2 \
     --epochs 450 \
     --batch_size 256 \
