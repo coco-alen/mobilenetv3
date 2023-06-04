@@ -1,7 +1,5 @@
 import torch
-# import torch.nn as nn
-import nni.retiarii.nn.pytorch as nn
-from nni.retiarii import model_wrapper
+import torch.nn as nn
 from params import args
 
 def _make_divisible(v, divisor, min_value=None):

@@ -21,4 +21,5 @@ python main.py \
     --finetune ./checkpoint/mobilenetv2/mobilenetv2_pytorch_pretrain.pth \
     --batch_size 256 \
     --eval true \
-    --quantize ./quantize_config/mobilenetv2_8bit.py
+    --use_amp false \
+    --prune ./prune_config/mobilenetv2.py

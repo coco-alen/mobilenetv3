@@ -13,14 +13,17 @@ import torch.backends.cudnn as cudnn
 import json
 import os
 
+import warnings
+warnings.filterwarnings("ignore")
+
 from pathlib import Path
 
 from timm.data.mixup import Mixup
 from timm.loss import LabelSmoothingCrossEntropy, SoftTargetCrossEntropy
 from timm.utils import ModelEma
 from optim_factory import create_optimizer, LayerDecayValueAssigner
-from mobilenetv3 import MobileNetV3_Small, MobileNetV3_Large
-from mobilenetv2 import MobileNetV2
+from model.mobilenetv3 import MobileNetV3_Small, MobileNetV3_Large
+from model.mobilenetv2 import MobileNetV2
 
 from datasets import build_dataset
 from engine import train_one_epoch, evaluate
@@ -31,6 +34,7 @@ import utils
 from utils_gyp import import_variable
 
 from quantize import quantize_model
+from prune import prune_model
 
 def main(args):
     utils.init_distributed_mode(args)
@@ -205,11 +209,16 @@ def main(args):
     utils.auto_load_model(
         args=args, model=model, model_without_ddp=model_without_ddp,
         optimizer=optimizer, loss_scaler=loss_scaler, model_ema=model_ema)
+    
+    if args.prune != None:
+        config = import_variable(args.prune, 'config')
+        print("prune model with config = %s" % str(config))
+        model = prune_model(model, config)
 
     if args.quantize != None:
         config = import_variable(args.quantize, 'config')
         print("Quantize model with config = %s" % str(config))
-        quantize_model(model, config, data_loader_train, optimizer)
+        model = quantize_model(model, config, data_loader_train, optimizer)
 
     if args.eval:
         print(f"Eval only mode")

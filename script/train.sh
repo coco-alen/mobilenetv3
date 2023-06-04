@@ -25,14 +25,28 @@
 #     --data_path /ssd/dataset/imagenet_1k \
 #     --output_dir ./checkpoint
 
+# python -u main.py \
+#     --model mobilenet_v2 \
+#     --epochs 450 \
+#     --batch_size 256 \
+#     --lr 4e-3 \
+#     --update_freq 2 \
+#     --model_ema false \
+#     --model_ema_eval false \
+#     --use_amp true \
+#     --data_path /ssd/dataset/imagenet_1k \
+#     --output_dir ./checkpoint/mobilenetv2/
+
 python -u main.py \
     --model mobilenet_v2 \
-    --epochs 450 \
-    --batch_size 256 \
-    --lr 4e-3 \
+    --epochs 100 \
+    --batch_size 512 \
+    --lr 4e-1 \
     --update_freq 2 \
     --model_ema false \
     --model_ema_eval false \
     --use_amp true \
     --data_path /ssd/dataset/imagenet_1k \
-    --output_dir ./checkpoint/mobilenetv2/
+    --finetune ./checkpoint/mobilenetv2/mobilenetv2_pytorch_pretrain.pth \
+    --prune ./prune_config/mobilenetv2.py \
+    --output_dir ./checkpoint/mobilenetv2_prune/

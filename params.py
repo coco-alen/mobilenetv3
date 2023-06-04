@@ -168,7 +168,8 @@ def get_args_parser():
                         help="Save model checkpoints as W&B Artifacts.")
     parser.add_argument('--quantize', type=str, default=None,
                         help='quantization config file path')
-
+    parser.add_argument('--prune', type=str, default=None,
+                        help='pruning config file path')
 
     return parser
 
