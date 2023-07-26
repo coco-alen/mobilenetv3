@@ -171,6 +171,12 @@ def get_args_parser():
     parser.add_argument('--prune', type=str, default=None,
                         help='pruning config file path')
 
+    # nni setting
+    parser.add_argument('--nni_hyperparam_opt', action='store_true',default=False, 
+                            help='whether to use nni hyperparam opt. WARNING: do not set it manually.')
+
+
+
     return parser
 
 

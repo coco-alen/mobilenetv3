@@ -18,6 +18,7 @@ from timm.optim.nvnovograd import NvNovoGrad
 from timm.optim.radam import RAdam
 from timm.optim.rmsprop_tf import RMSpropTF
 from timm.optim.sgdp import SGDP
+import nni
 
 import json
 
@@ -112,6 +113,13 @@ def get_parameter_groups(model, weight_decay=1e-5, skip_list=(), get_num_layer=N
 
 
 def create_optimizer(args, model, get_num_layer=None, get_layer_scale=None, filter_bias_and_bn=True, skip_list=None):
+    # nni hyperparam update
+    if args.nni_hyperparam_opt:
+        params = nni.get_next_parameter()
+        args.lr = params['lr']
+        args.weight_decay = params['weight_decay']
+        args.momentum = params['momentum']
+
     opt_lower = args.opt.lower()
     weight_decay = args.weight_decay
     # if weight_decay and filter_bias_and_bn:

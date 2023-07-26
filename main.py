@@ -24,6 +24,7 @@ from timm.utils import ModelEma
 from optim_factory import create_optimizer, LayerDecayValueAssigner
 from model.mobilenetv3 import MobileNetV3_Small, MobileNetV3_Large
 from model.mobilenetv2 import MobileNetV2
+import nni
 
 from datasets import build_dataset
 from engine import train_one_epoch, evaluate
@@ -31,7 +32,7 @@ from engine import train_one_epoch, evaluate
 from params import args
 from utils import NativeScalerWithGradNormCount as NativeScaler
 import utils
-from utils_gyp import import_variable
+from utils import import_variable
 
 from quantize import quantize_model
 from prune import prune_model
@@ -213,7 +214,7 @@ def main(args):
     if args.prune != None:
         config = import_variable(args.prune, 'config')
         print("prune model with config = %s" % str(config))
-        model = prune_model(model, config)
+        model = prune_model(model, config, data_loader_train)
 
     if args.quantize != None:
         config = import_variable(args.quantize, 'config')
@@ -263,6 +264,9 @@ def main(args):
                         loss_scaler=loss_scaler, epoch="best", model_ema=model_ema)
             print(f'Max accuracy: {max_accuracy:.2f}%')
 
+            # add nni result report
+            nni.report_intermediate_result(test_stats["acc1"]) 
+
             if log_writer is not None:
                 log_writer.update(test_acc1=test_stats['acc1'], head="perf", step=epoch)
                 log_writer.update(test_acc5=test_stats['acc5'], head="perf", step=epoch)
@@ -300,6 +304,8 @@ def main(args):
 
         if wandb_logger:
             wandb_logger.log_epoch_metrics(log_stats)
+
+    nni.report_final_result(max_accuracy)
 
     if args.model_ema and args.model_ema_eval:
         utils.bn_update(data_loader_train, model_ema.ema, use_amp=args.use_amp)
