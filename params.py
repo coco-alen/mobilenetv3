@@ -60,7 +60,7 @@ def get_args_parser():
     parser.add_argument('--layer_decay', type=float, default=1.0)
     parser.add_argument('--min_lr', type=float, default=1e-6, metavar='LR',
                         help='lower lr bound for cyclic schedulers that hit 0 (1e-6)')
-    parser.add_argument('--warmup_epochs', type=int, default=20, metavar='N',
+    parser.add_argument('--warmup_epochs', type=int, default=0, metavar='N',
                         help='epochs to warmup LR, if scheduler supports')
     parser.add_argument('--warmup_steps', type=int, default=-1, metavar='N',
                         help='num of steps to warmup LR, will overload warmup_epochs if set > 0')
@@ -174,10 +174,10 @@ def get_args_parser():
     # nni setting
     parser.add_argument('--nni_hyperparam_opt', action='store_true',default=False, 
                             help='whether to use nni hyperparam opt. WARNING: do not set it manually.')
-
-
+    parser.add_argument('--nni_NAS', action='store_true',default=False, 
+                            help='whether to do neural arch search. WARNING: do not set it manually.')
 
     return parser
 
 
-args = argparse.ArgumentParser('ConvNeXt training and evaluation script', parents=[get_args_parser()]).parse_args()
+args = argparse.ArgumentParser('classfication task training and evaluation script', parents=[get_args_parser()]).parse_args()

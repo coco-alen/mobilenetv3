@@ -40,16 +40,20 @@
 
 python -u main.py \
     --model mobilenet_v2 \
-    --epochs 450 \
+    --epochs 100 \
     --batch_size 64 \
     --lr 4e-3 \
+    --drop_path 0.05 \
+    --weight_decay 1e-3 \
+    --warmup_epochs 10 \
+    --smoothing 0.1 \
     --update_freq 2 \
     --model_ema false \
     --model_ema_eval false \
     --use_amp true \
     --data_set CIFAR \
     --data_path /ssd/dataset/cifar_100 \
-    --output_dir ./checkpoint/mobilenetv2/
+    --output_dir ./checkpoint/mobilenetv2/ 
 
 # python -u main.py \
 #     --model mobilenet_v2 \
@@ -64,3 +68,4 @@ python -u main.py \
 #     --finetune ./checkpoint/mobilenetv2/mobilenetv2_pytorch_pretrain.pth \
 #     --prune ./prune_config/mobilenetv2.py \
 #     --output_dir ./checkpoint/mobilenetv2_prune/
+

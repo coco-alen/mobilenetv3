@@ -37,7 +37,7 @@ from utils import import_variable
 from quantize import quantize_model
 from prune import prune_model
 
-def main(args):
+def main(model_cls):
     utils.init_distributed_mode(args)
     print(args)
     device = torch.device(args.device)
@@ -46,7 +46,7 @@ def main(args):
     seed = args.seed + utils.get_rank()
     torch.manual_seed(seed)
     np.random.seed(seed)
-    cudnn.benchmark = True
+    # cudnn.benchmark = True
 
     dataset_train, args.nb_classes = build_dataset(is_train=True, args=args)
     if args.disable_eval:
@@ -90,7 +90,7 @@ def main(args):
     if dataset_val is not None:
         data_loader_val = torch.utils.data.DataLoader(
             dataset_val, sampler=sampler_val,
-            batch_size=args.batch_size,
+            batch_size=int(1.5*args.batch_size),
             num_workers=args.num_workers,
             pin_memory=args.pin_mem,
             drop_last=False
@@ -107,12 +107,7 @@ def main(args):
             prob=args.mixup_prob, switch_prob=args.mixup_switch_prob, mode=args.mixup_mode,
             label_smoothing=args.smoothing, num_classes=args.nb_classes)
 
-    if args.model == "mobilenet_v3_small":
-        model = MobileNetV3_Small()
-    elif args.model == "mobilenet_v3_large":
-        model = MobileNetV3_Large()
-    elif args.model == "mobilenet_v2":
-        model = MobileNetV2()
+    model = model_cls()
 
     if args.finetune:
         if args.finetune.startswith('https'):
@@ -196,6 +191,8 @@ def main(args):
     wd_schedule_values = utils.cosine_scheduler(
         args.weight_decay, args.weight_decay_end, args.epochs, num_training_steps_per_epoch)
     print("Max WD = %.7f, Min WD = %.7f" % (max(wd_schedule_values), min(wd_schedule_values)))
+    # lr_schedule_values = None
+    # wd_schedule_values = None
 
     if mixup_fn is not None:
         # smoothing is handled with mixup label transform
@@ -330,4 +327,11 @@ def main(args):
 if __name__ == '__main__':
     if args.output_dir:
         Path(args.output_dir).mkdir(parents=True, exist_ok=True)
-    main(args)
+    if args.model == "mobilenet_v3_small":
+        model = MobileNetV3_Small
+    elif args.model == "mobilenet_v3_large":
+        model = MobileNetV3_Large
+    elif args.model == "mobilenet_v2":
+        model = MobileNetV2
+
+    main(model)
